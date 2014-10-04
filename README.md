@@ -38,3 +38,14 @@ your InfluxDB:
 python get_memory_usage.py
 python get_disk_usage.py $HOME
 ```
+
+Finally you will want to schedule the metrics collection via crontab:
+
+```
+* * * * * python /opt/python-server-metrics-scripts/get_memory_usage.py influxdb > /opt/python-server-metrics-scripts/logs/get_memory_usage.log 2&1
+* 0 */1 * * * python /opt/python-server-metrics-scripts/get_disk_usage.py /opt/influxdb/shared/data/ > /opt/python-server-metrics-scripts/logs/get_disk_usage.log 2&1
+```
+
+NOTE: For some reason ``get_memory_usage.py`` returns 0 when called without
+a username from crontab. It works when called from the command line. If someone
+figures out how to fix this, please send a pull request :)
