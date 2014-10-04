@@ -1,2 +1,2 @@
 influxdb
-python-server-metrics==0.1.4
+python-server-metrics==0.1.5
