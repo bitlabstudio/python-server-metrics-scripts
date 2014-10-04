@@ -26,9 +26,10 @@ something like this:
 
 ```
 sudo apt-get install python-dev, python-pip
-sudo pip install influxdb
-sudo pip install python-server-metrics
+sudo pip install -r requirements.txt
 ```
+
+NOTE: You might want to create a virtual environment for this repository.
 
 Now you should be able to testrun the scripts and results should show up in
 your InfluxDB:
@@ -37,5 +38,3 @@ your InfluxDB:
 python get_memory_usage.py
 python get_disk_usage.py $HOME
 ```
-
-
