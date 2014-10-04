@@ -37,12 +37,14 @@ your InfluxDB:
 ```
 python get_memory_usage.py
 python get_disk_usage.py $HOME
+python get_cpu_usage.py
 ```
 
 Finally you will want to schedule the metrics collection via crontab:
 
 ```
 * * * * * python /opt/python-server-metrics-scripts/get_memory_usage.py influxdb > /opt/python-server-metrics-scripts/logs/get_memory_usage.log 2&1
+* * * * * python /opt/python-server-metrics-scripts/get_cpu_usage.py influxdb > /opt/python-server-metrics-scripts/logs/get_cpu_usage.log 2&1
 * 0 */1 * * * python /opt/python-server-metrics-scripts/get_disk_usage.py /opt/influxdb/shared/data/ > /opt/python-server-metrics-scripts/logs/get_disk_usage.log 2&1
 ```
 
