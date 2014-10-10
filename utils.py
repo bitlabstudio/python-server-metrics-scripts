@@ -45,4 +45,5 @@ def write_points(data):
 
     """
     db = get_db()
+    print(data)
     db.write_points(data)
