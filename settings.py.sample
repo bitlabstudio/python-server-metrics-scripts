@@ -1,8 +1,9 @@
-INFLUXDB_HOST = ''
+INFLUXDB_HOST = 'localhost'
 INFLUXDB_PORT = '8086'
 INFLUXDB_USER = ''
 INFLUXDB_PASSWORD = ''
 INFLUXDB_DATABASE = ''
+INFLUXDB_TIMEOUT = 5
 
 # This will be part of the series name, i.e. `default.server_name.memory.usage`
 SERVER_NAME = ''

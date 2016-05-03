@@ -1,49 +1,60 @@
-"""Utilities for working with InfluxDB."""
+"""Utilities for working with influxdb."""
+from threading import Thread
+
+from influxdb import InfluxDBClient
+
 import settings
 
-from influxdb import client as influxdb
 
-
-def get_db():
-    """Returns an ``InfluxDBClient`` instance based on the settings."""
-    return influxdb.InfluxDBClient(
+def get_client():
+    """Returns an ``InfluxDBClient`` instance."""
+    return InfluxDBClient(
         settings.INFLUXDB_HOST,
         settings.INFLUXDB_PORT,
         settings.INFLUXDB_USER,
         settings.INFLUXDB_PASSWORD,
         settings.INFLUXDB_DATABASE,
+        timeout=settings.INFLUXDB_TIMEOUT,
+        ssl=getattr(settings, 'INFLUXDB_SSL', False),
+        verify_ssl=getattr(settings, 'INFLUXDB_VERIFY_SSL', False),
     )
 
 
-def write_point(series_name, value, column_name=None):
+def query(query, time_precision='s', chunked=False):
+    """Wrapper around ``InfluxDBClient.query()``."""
+    client = get_client()
+    return client.query(query, time_precision=time_precision, chunked=chunked)
+
+
+def write_points(data, force_disable_threading=False):
     """
-    Writes a single point with a single column to a series.
-
-    :param series_name: String representing the series name.
-    :param value: The value that should be saved.
-    :param column_name: String representing the column name for the value.
-      If ``None``, the name will be set to ``value``.
-
+    Writes a series to influxdb.
+    :param data: Array of dicts, as required by
+      https://github.com/influxdb/influxdb-python
+    :param force_disable_threading: When being called from the Celery task, we
+      set this to `True` so that the user doesn't accidentally use Celery and
+      threading at the same time.
     """
-    if column_name is None:
-        column_name = 'value'
+    if getattr(settings, 'INFLUXDB_DISABLED', False):
+        return
 
-    data = [{
-        'name': series_name,
-        'columns': [column_name, ],
-        'points': [[value]], }]
-    write_points(data)
+    client = get_client()
+    use_threading = getattr(settings, 'INFLUXDB_USE_THREADING', False)
+    if force_disable_threading:
+        use_threading = False
+    if use_threading is True:
+        thread = Thread(target=write_points_threaded, args=(client, data, ))
+        thread.start()
+    else:
+        client.write_points(data)
 
 
-def write_points(data):
-    """
-    Wrapper for the ``write_points`` function of ``InfluxDBClient``.
-
-    Conveniently gets an ``InfluxDBClient`` instance based on the settings.
-
-    :param data: The data dict that ``InfluxDBClient.write_points`` expects.
-
-    """
-    db = get_db()
-    print(data)
-    db.write_points(data)
+def write_points_threaded(client, data):  # pragma: no cover
+    """Method to be called via threading module."""
+    try:
+        client.write_points(data)
+    except Exception as err:
+        if getattr(settings, 'INFLUXDB_FAIL_SILENTLY', True):
+            pass
+        else:
+            raise err.message

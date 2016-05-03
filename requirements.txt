@@ -1,2 +1,2 @@
-influxdb
-python-server-metrics==0.1.7
+influxdb<2.7.0
+python-server-metrics

@@ -16,7 +16,7 @@ def main(argv):
     largest_process = float(largest_process)
     series_name = 'default.{0}.cpu.usage'.format(settings.SERVER_NAME)
     data = [{
-        'name': series_name,
+        'measurement': series_name,
         'columns': ['value', 'largest_process', 'largest_process_name', ],
         'points': [[total, largest_process, largest_process_name]], }]
     write_points(data)

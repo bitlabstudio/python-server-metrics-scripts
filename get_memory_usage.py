@@ -14,7 +14,7 @@ def main(argv):
     total, largest_process, largest_process_name = get_memory_usage(user)
     series_name = 'default.{0}.memory.usage'.format(settings.SERVER_NAME)
     data = [{
-        'name': series_name,
+        'measurement': series_name,
         'columns': ['value', 'largest_process', 'largest_process_name', ],
         'points': [[total, largest_process, largest_process_name]], }]
     write_points(data)
